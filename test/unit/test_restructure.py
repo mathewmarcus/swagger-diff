@@ -1,66 +1,48 @@
 from mock import Mock, MagicMock
-from swagger_diff.restructure import _resolve_ref
+from swagger_diff.restructure import resolve_ref
+from test.conftest import full_raw_swagger
 
-full_raw_swagger = {
-    "info": {
-        "title": "Swagger Petstore",
-        "version": "1.0.0"
-    },
-    "swagger": "2.0",
-    "paths": {
-        "/random": {
-            "get": {
-                "description": "A cute furry animal endpoint.",
-                "responses": {
-                    "200": {
-                        "schema": {
-                            "$ref": "#/definitions/Pet"
-                        },
-                        "description": "A pet to be returned"
-                    }
-                },
-            }
-        }
-    },
-    "definitions": {
-        "Pet": {
-            "properties": {
-                "category": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Category"
-                    }
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "Category": {
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer",
-                    "format": "int32"
-                }
-            }
-        }
-    },
-}
 
 def test_resolve_ref_valid():
     category = full_raw_swagger['definitions']['Category']
+    reference = {'$ref': '#/definitions/Category'}    
     
     full_swagger = MagicMock()
     def return_resolved_object(ref):
-        return full_raw_swagger['definitions']['Category']
+        return (reference, full_raw_swagger['definitions']['Category'])
 
-    full_swagger.resolve_fragment = return_resolved_object
-    reference = {'$ref': '#/definitions/Category'}
+    full_swagger.resolve = return_resolved_object
     
-    assert _resolve_ref(reference, full_swagger) == category
+    assert resolve_ref(reference, full_swagger) == category
+
+
+def test_resolve_ref_invalid_regex():
+    category = full_raw_swagger['definitions']['Category']
+    full_swagger = MagicMock()
+    reference = {'$ref': '#definitionsCategory'}
+    
+    assert resolve_ref(reference, full_swagger) == reference
+
+
+def test_resolve_ref_invalid_ref_type():
+    category = full_raw_swagger['definitions']['Category']
+    full_swagger = MagicMock()
+    reference = {'$ref': []}
+    
+    assert resolve_ref(reference, full_swagger) == reference
+
+
+def test_resolve_ref_missing_ref_key():
+    category = full_raw_swagger['definitions']['Category']
+    full_swagger = MagicMock()
+    reference = {'foobar': '#/definitions/Category'}
+    
+    assert resolve_ref(reference, full_swagger) == reference
+
+
+def test_resolve_ref_invalid_type():
+    category = full_raw_swagger['definitions']['Category']
+    full_swagger = MagicMock()
+    reference = '$ref'
+    
+    assert resolve_ref(reference, full_swagger) == reference
