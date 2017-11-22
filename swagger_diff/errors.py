@@ -14,11 +14,11 @@ def update_errors(canonical_key, message):
 
     Examples:
         >>> from swagger_diff import errors
-        >>> print(errors)
+        >>> print(errors._errors)
         {}
         >>> update_errors('/hello/world/foo/bar', 'Some error message')
         None
-        >>> print(errors)
+        >>> print(errors._errors)
         {'hello': {'world': {'foo': {'bar': 'Some error message'}}}}
 
     """
