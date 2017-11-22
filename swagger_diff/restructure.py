@@ -6,8 +6,8 @@ from jsonschema.validators import RefResolver
 def resolve_ref(reference, full_swagger):
     """ Convert a JSON Schema reference string into the referenced object
 
-    If `reference` is not in the form {'$ref: :obj:`str`}, return `reference`
-    
+    If `reference` is not in the form {'$ref': :obj:`str`}, return `reference`
+
     Args:
        reference (str): JSON schema $ref value
        full_swagger (:obj:`jsonschema.validators.RefResolver`): the full Swagger schema
